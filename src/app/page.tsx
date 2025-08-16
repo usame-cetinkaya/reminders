@@ -1,12 +1,16 @@
 import Image from "next/image";
 import { auth } from "@/auth";
+import { getCloudflareContext } from "@opennextjs/cloudflare";
 
 export default async function Home() {
   const session = await auth();
+  const { env } = getCloudflareContext();
+  const db = env.DB;
+  const result = await db.prepare("SELECT 1").bind().all();
   return (
     <div className="font-sans grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20">
       <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
-        <pre>{JSON.stringify(session, null, 2)}</pre>
+        <pre>{JSON.stringify({ session, result }, null, 2)}</pre>
         <Image
           className="dark:invert"
           src="/next.svg"
