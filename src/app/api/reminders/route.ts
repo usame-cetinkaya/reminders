@@ -31,7 +31,18 @@ export const GET = auth(async function (req) {
 
 export const POST = auth(async function (req) {
   const { db, user } = await getDbAndUser(req);
-  const reminder = (await req.json()) as Reminder;
+  const reminder = (await req.json()) as Reminder & { minutes: number };
+
+  if (reminder.minutes) {
+    const now = new Date();
+    now.setMinutes(now.getMinutes() + reminder.minutes);
+    reminder.remind_at = now.toISOString();
+    reminder.period = "once";
+  }
+
+  if (!reminder.name || !reminder.remind_at || !reminder.period) {
+    return NextResponse.json("Bad Request", { status: 400 });
+  }
 
   reminder.user_id = user.id;
 
