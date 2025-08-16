@@ -13,10 +13,9 @@ export default {
    * - `curl "http://localhost:8787/__scheduled?cron=*+*+*+*+*"`
    */
   async scheduled(event, env, ctx) {
-    console.log("Scheduled event", event);
-
     const url = new URL("/api/cron", "http://internal");
     const request = new Request(url.toString(), { method: "GET" });
+
     request.headers.set("Authorization", `Bearer ${env.CRON_SECRET}`);
 
     ctx.waitUntil(handler.fetch(request, env, ctx));
