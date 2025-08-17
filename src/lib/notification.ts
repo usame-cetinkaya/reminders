@@ -1,7 +1,7 @@
 import { Reminder, User } from "@/lib/models";
 
 const localDateTime = (isoString: string) =>
-  new Date(isoString).toLocaleDateString("tr-TR", {
+  new Date(isoString).toLocaleString("tr-TR", {
     timeZone: "Europe/Istanbul",
   });
 
