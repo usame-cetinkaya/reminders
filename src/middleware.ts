@@ -3,7 +3,7 @@ import { auth } from "@/auth";
 export default auth((req) => {
   const path = req.nextUrl.pathname;
 
-  if (req.auth || path.startsWith("/api/auth")) {
+  if (req.auth || path.startsWith("/api/")) {
     return;
   }
 
