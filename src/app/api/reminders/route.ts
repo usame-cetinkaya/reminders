@@ -18,8 +18,8 @@ const getDbAndUser = async (req: NextAuthRequest) => {
 
   const authHeader = req.headers.get("Authorization");
 
-  if (authHeader) {
-    const token = authHeader.split(" ")[1];
+  if (authHeader && authHeader.startsWith("Bearer ")) {
+    const token = authHeader.slice(7).trim();
 
     if (token) {
       const user = await getUserByAPIToken(db, token);
