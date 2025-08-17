@@ -1,17 +1,10 @@
-import { Reminder, User } from "@/lib/models";
+import { Reminder } from "@/lib/models";
 
 export const getDueReminders = async (db: D1Database, now: Date) => {
   const sql = `SELECT * FROM reminders WHERE remind_at <= ?`;
   const result = await db.prepare(sql).bind(now.toISOString()).all();
 
   return result.results as Reminder[];
-};
-
-export const notifyUserAboutReminder = async (
-  user: User,
-  reminder: Reminder,
-) => {
-  console.log({ user, reminder });
 };
 
 export const getRemindersByUserId = async (db: D1Database, userId: number) => {

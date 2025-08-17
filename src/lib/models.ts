@@ -1,6 +1,8 @@
 export type User = {
   id: number;
   email: string;
+  pb_token: string | null;
+  api_token: string | null;
   created_at: string;
 };
 

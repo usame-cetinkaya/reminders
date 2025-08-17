@@ -1,0 +1,2 @@
+ALTER TABLE users ADD COLUMN pb_token TEXT;
+ALTER TABLE users ADD COLUMN api_token TEXT;

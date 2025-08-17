@@ -1,10 +1,10 @@
 import { getCloudflareContext } from "@opennextjs/cloudflare";
 import { NextResponse } from "next/server";
 import { Reminder } from "@/lib/models";
+import { notify } from "@/lib/notification";
 import {
   deleteReminder,
   getDueReminders,
-  notifyUserAboutReminder,
   updateReminder,
 } from "@/lib/reminder";
 import { getUserById } from "@/lib/user";
@@ -28,7 +28,7 @@ export async function GET(req: Request) {
 
   for (const reminder of dueReminders) {
     const user = await getUserById(db, reminder.user_id);
-    await notifyUserAboutReminder(user, reminder);
+    await notify(user, reminder);
     await handleReminderPeriod(db, reminder);
   }
 
