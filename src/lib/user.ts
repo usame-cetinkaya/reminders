@@ -7,6 +7,13 @@ export const getUserById = async (db: D1Database, id: number) => {
   return result as unknown as User;
 };
 
+export const getUserByAPIToken = async (db: D1Database, apiToken: string) => {
+  const sql = `SELECT * FROM users WHERE api_token = ?`;
+  const result = await db.prepare(sql).bind(apiToken).first();
+
+  return result as unknown as User;
+};
+
 export const getUserByEmail = async (db: D1Database, email: string) => {
   const sql = `SELECT * FROM users WHERE email = ?`;
   const result = await db.prepare(sql).bind(email).first();

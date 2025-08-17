@@ -10,12 +10,25 @@ import {
   getRemindersByUserId,
   updateReminder,
 } from "@/lib/reminder";
-import { getUserByEmail } from "@/lib/user";
+import { getUserByAPIToken, getUserByEmail } from "@/lib/user";
 
 const getDbAndUser = async (req: NextAuthRequest) => {
+  const db = getCloudflareContext().env.DB;
+
+  const authHeader = req.headers.get("Authorization");
+
+  if (authHeader) {
+    const token = authHeader.split(" ")[1];
+
+    if (token) {
+      const user = await getUserByAPIToken(db, token);
+
+      return { db, user };
+    }
+  }
+
   if (!req.auth) throw new Error("Unauthorized");
 
-  const db = getCloudflareContext().env.DB;
   const email = req?.auth?.user?.email as string;
   const user = await getUserByEmail(db, email);
 
