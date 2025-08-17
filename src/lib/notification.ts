@@ -25,14 +25,15 @@ export const notify = async (user: User, reminder: Reminder) => {
   const title = getTitle(reminder);
   const body = getBody(reminder);
 
-  return notifyViaPushbullet(title, body, user.pb_token);
+  // return notifyViaPushbullet(title, body, user.pb_token);
+  return notifyViaResend(user.email, title, body);
 };
 
 const notifyViaPushbullet = async (
   title: string,
   body: string,
   accessToken: string,
-): Promise<void> => {
+) => {
   const response = await fetch("https://api.pushbullet.com/v2/pushes", {
     method: "POST",
     headers: {
@@ -48,5 +49,25 @@ const notifyViaPushbullet = async (
 
   if (!response.ok) {
     throw new Error(`Pushbullet API error: ${response.statusText}`);
+  }
+};
+
+const notifyViaResend = async (to: string, subject: string, html: string) => {
+  const response = await fetch("https://api.resend.com/emails", {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${process.env.RESEND_API_KEY}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      from: "reminders@usame.link",
+      to,
+      subject,
+      html,
+    }),
+  });
+
+  if (!response.ok) {
+    throw new Error(`Resend API error: ${response.statusText}`);
   }
 };

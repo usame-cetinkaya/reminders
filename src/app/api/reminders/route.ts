@@ -2,6 +2,7 @@ import { auth } from "@/auth";
 import { NextAuthRequest } from "next-auth";
 import { getCloudflareContext } from "@opennextjs/cloudflare";
 import { NextResponse } from "next/server";
+import { getUserByAPIToken } from "@/lib/api-token";
 import { Reminder } from "@/lib/models";
 import {
   createReminder,
@@ -10,7 +11,7 @@ import {
   getRemindersByUserId,
   updateReminder,
 } from "@/lib/reminder";
-import { getUserByAPIToken, getUserByEmail } from "@/lib/user";
+import { getUserByEmail } from "@/lib/user";
 
 const getDbAndUser = async (req: NextAuthRequest) => {
   const db = getCloudflareContext().env.DB;

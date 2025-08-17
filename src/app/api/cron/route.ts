@@ -29,6 +29,8 @@ export async function GET(req: Request) {
   for (const reminder of dueReminders) {
     const user = await getUserById(db, reminder.user_id);
     await notify(user, reminder);
+    // wait for 1 second to avoid rate limiting
+    await new Promise((resolve) => setTimeout(resolve, 1000));
     await handleReminderPeriod(db, reminder);
   }
 
