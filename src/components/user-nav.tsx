@@ -1,3 +1,5 @@
+import Link from "next/link";
+import { auth, signOut } from "@/auth";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import {
@@ -8,7 +10,6 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { auth } from "@/auth";
 
 const getInitials = (fullName: string) =>
   fullName
@@ -45,9 +46,21 @@ export async function UserNav() {
           </div>
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
-        <DropdownMenuItem>Settings</DropdownMenuItem>
+        <Link href="/settings">
+          <DropdownMenuItem className="cursor-pointer">
+            Settings
+          </DropdownMenuItem>
+        </Link>
         <DropdownMenuSeparator />
-        <DropdownMenuItem>Log out</DropdownMenuItem>
+        <DropdownMenuItem
+          onClick={async () => {
+            "use server";
+            await signOut();
+          }}
+          className="cursor-pointer"
+        >
+          Log out
+        </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
   );
