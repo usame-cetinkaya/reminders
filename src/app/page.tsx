@@ -1,22 +1,25 @@
 "use client";
 
-import { Button } from "@/components/ui/button";
-import { Plus } from "lucide-react";
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Reminder } from "@/lib/models";
+import { deleteReminder, fetchReminders } from "@/lib/react-query";
+import { Button } from "@/components/ui/button";
+import ListItem from "@/components/list-item";
+import { Plus } from "lucide-react";
 
 export default function Home() {
-  const fetchReminders = async () => {
-    const response = await fetch("/api/reminders");
-    if (!response.ok) {
-      throw new Error("Network response was not ok");
-    }
-    return response.json() as unknown as Reminder[];
-  };
+  const queryClient = useQueryClient();
 
   const query = useQuery({
-    queryKey: ["reminders"],
     queryFn: fetchReminders,
+    queryKey: ["reminders"],
+  });
+
+  const deleteMutation = useMutation({
+    mutationFn: deleteReminder,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["reminders"] });
+    },
   });
 
   return (
@@ -26,13 +29,16 @@ export default function Home() {
       {query.isSuccess && (
         <div className="flex flex-col gap-4">
           {query.data.map((reminder: Reminder) => (
-            <div
+            <ListItem
               key={reminder.id}
-              className="p-4 border rounded-lg shadow-sm hover:shadow-md transition-shadow"
-            >
-              <h3 className="text-lg font-semibold">{reminder.name}</h3>
-              <p className="text-sm text-gray-600">{reminder.period}</p>
-            </div>
+              reminder={reminder}
+              onItemClick={() => {
+                alert(`Reminder clicked: ${reminder.name}`);
+              }}
+              onDeleteClick={() => {
+                deleteMutation.mutate(reminder.id);
+              }}
+            />
           ))}
         </div>
       )}

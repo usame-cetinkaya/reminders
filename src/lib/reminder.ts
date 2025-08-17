@@ -8,7 +8,7 @@ export const getDueReminders = async (db: D1Database, now: Date) => {
 };
 
 export const getRemindersByUserId = async (db: D1Database, userId: number) => {
-  const sql = `SELECT * FROM reminders WHERE user_id = ?`;
+  const sql = `SELECT * FROM reminders WHERE user_id = ? ORDER BY remind_at`;
   const result = await db.prepare(sql).bind(userId).all();
 
   return result.results as Reminder[];

@@ -1,8 +1,13 @@
 import { Reminder, User } from "@/lib/models";
 
-const localDateTime = (isoString: string) =>
+export const localDateTime = (isoString: string) =>
   new Date(isoString).toLocaleString("tr-TR", {
     timeZone: "Europe/Istanbul",
+    hour: "2-digit",
+    minute: "2-digit",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
   });
 
 const localTime = (isoString: string) =>
@@ -29,28 +34,28 @@ export const notify = async (user: User, reminder: Reminder) => {
   return notifyViaResend(user.email, title, body);
 };
 
-const notifyViaPushbullet = async (
-  title: string,
-  body: string,
-  accessToken: string,
-) => {
-  const response = await fetch("https://api.pushbullet.com/v2/pushes", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      "Access-Token": accessToken,
-    },
-    body: JSON.stringify({
-      type: "note",
-      title,
-      body,
-    }),
-  });
-
-  if (!response.ok) {
-    throw new Error(`Pushbullet API error: ${response.statusText}`);
-  }
-};
+// const notifyViaPushbullet = async (
+//   title: string,
+//   body: string,
+//   accessToken: string,
+// ) => {
+//   const response = await fetch("https://api.pushbullet.com/v2/pushes", {
+//     method: "POST",
+//     headers: {
+//       "Content-Type": "application/json",
+//       "Access-Token": accessToken,
+//     },
+//     body: JSON.stringify({
+//       type: "note",
+//       title,
+//       body,
+//     }),
+//   });
+//
+//   if (!response.ok) {
+//     throw new Error(`Pushbullet API error: ${response.statusText}`);
+//   }
+// };
 
 const notifyViaResend = async (to: string, subject: string, html: string) => {
   const response = await fetch("https://api.resend.com/emails", {
