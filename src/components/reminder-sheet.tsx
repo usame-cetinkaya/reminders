@@ -78,11 +78,11 @@ export function ReminderSheet({
       <SheetContent side={isMobile ? "bottom" : "right"}>
         <form onSubmit={handleSubmit}>
           <SheetHeader>
-            <SheetTitle>New Reminder</SheetTitle>
+            <SheetTitle>{reminder ? "Edit" : "New"} Reminder</SheetTitle>
             <SheetDescription />
           </SheetHeader>
-          <div className="grid flex-1 auto-rows-min gap-6 px-4">
-            <div className="grid gap-3">
+          <div className="grid flex-1 auto-rows-min gap-4 px-4">
+            <div className="grid gap-2">
               <Label htmlFor="name">Name</Label>
               <Input
                 required
@@ -93,7 +93,7 @@ export function ReminderSheet({
                 }}
               />
             </div>
-            <div className="grid gap-3">
+            <div className="grid gap-2">
               <Label htmlFor="remind-at">Remind At</Label>
               <Input
                 required
@@ -105,7 +105,7 @@ export function ReminderSheet({
                 }}
               />
             </div>
-            <div className="grid gap-3">
+            <div className="grid gap-2">
               <Label htmlFor="period">Period</Label>
               <Select
                 value={period}
@@ -123,11 +123,12 @@ export function ReminderSheet({
                 </SelectContent>
               </Select>
             </div>
+            <Button type="submit" className="mt-6">
+              Save
+            </Button>
           </div>
-          <SheetFooter>
-            <Button type="submit">Save</Button>
-          </SheetFooter>
         </form>
+        <SheetFooter />
       </SheetContent>
     </Sheet>
   );
