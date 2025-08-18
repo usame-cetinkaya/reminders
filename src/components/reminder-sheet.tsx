@@ -21,6 +21,7 @@ import {
   SheetHeader,
   SheetTitle,
 } from "@/components/ui/sheet";
+import { LoaderCircle, Save } from "lucide-react";
 
 interface ReminderSheetProps {
   isOpen: boolean;
@@ -54,7 +55,7 @@ export function ReminderSheet({
     }
   }, [reminder, isOpen]);
 
-  const handleSubmit = (event: FormEvent) => {
+  const handleSubmit = async (event: FormEvent) => {
     event.preventDefault();
 
     const reminderDTO: ReminderDTO = {
@@ -65,9 +66,9 @@ export function ReminderSheet({
     };
 
     if (reminder) {
-      updateMutation.mutate(reminderDTO);
+      await updateMutation.mutateAsync(reminderDTO);
     } else {
-      createMutation.mutate(reminderDTO);
+      await createMutation.mutateAsync(reminderDTO);
     }
 
     onClose();
@@ -123,7 +124,16 @@ export function ReminderSheet({
                 </SelectContent>
               </Select>
             </div>
-            <Button type="submit" className="mt-6">
+            <Button
+              type="submit"
+              className="mt-6"
+              disabled={createMutation.isPending || updateMutation.isPending}
+            >
+              {createMutation.isPending || updateMutation.isPending ? (
+                <LoaderCircle className="animate-spin" />
+              ) : (
+                <Save />
+              )}
               Save
             </Button>
           </div>

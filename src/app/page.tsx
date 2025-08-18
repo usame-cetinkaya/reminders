@@ -16,6 +16,7 @@ export default function Home() {
   const [reminderToEdit, setReminderToEdit] = useState<ReminderDTO | null>(
     null,
   );
+  const [deletingIds, setDeletingIds] = useState<number[]>([]);
 
   return (
     <>
@@ -42,9 +43,14 @@ export default function Home() {
                 setReminderToEdit(reminder);
                 setIsSheetOpen(true);
               }}
-              onDeleteClick={() => {
-                deleteMutation.mutate(reminder.id);
+              onDeleteClick={async () => {
+                setDeletingIds((prev) => [...prev, reminder.id]);
+                await deleteMutation.mutateAsync(reminder.id);
+                setDeletingIds((prev) =>
+                  prev.filter((id) => id !== reminder.id),
+                );
               }}
+              isDeleting={deletingIds.includes(reminder.id)}
             />
           ))}
         </div>

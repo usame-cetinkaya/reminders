@@ -1,17 +1,19 @@
 import { ReminderDTO } from "@/lib/models";
 import { localDateTime } from "@/lib/notification";
 import { Button } from "@/components/ui/button";
-import { Calendar, RefreshCw, Trash } from "lucide-react";
+import { Calendar, LoaderCircle, RefreshCw, Trash } from "lucide-react";
 
 interface ListItemProps {
   reminder: ReminderDTO;
   onItemClick: () => void;
   onDeleteClick: () => void;
+  isDeleting: boolean;
 }
 export default function ListItem({
   reminder,
   onItemClick,
   onDeleteClick,
+  isDeleting,
 }: ListItemProps) {
   return (
     <div
@@ -38,6 +40,7 @@ export default function ListItem({
         </div>
       </div>
       <Button
+        disabled={isDeleting}
         onClick={(e) => {
           e.stopPropagation();
           if (confirm("Are you sure you want to delete this reminder?")) {
@@ -47,7 +50,7 @@ export default function ListItem({
         variant="secondary"
         className="ml-auto cursor-pointer"
       >
-        <Trash />
+        {isDeleting ? <LoaderCircle className="animate-spin" /> : <Trash />}
       </Button>
     </div>
   );

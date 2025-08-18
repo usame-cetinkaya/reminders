@@ -91,3 +91,50 @@ const deleteReminder = async (id: number) => {
   }
   return id;
 };
+
+const fetchMe = async () => {
+  const response = await fetch("/api/me", {
+    method: "GET",
+    headers: {
+      "Content-Type": "application/json",
+    },
+  });
+  if (!response.ok) {
+    throw new Error("Failed to fetch me");
+  }
+  return (await response.json()) as unknown as { pb_token: string | null };
+};
+
+const updateMe = async ({ pb_token }: { pb_token: string | null }) => {
+  const response = await fetch("/api/me", {
+    method: "PUT",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ pb_token }),
+  });
+  if (!response.ok) {
+    throw new Error("Failed to update me");
+  }
+};
+
+export const useMeQuery = () => {
+  const queryClient = useQueryClient();
+
+  const query = useQuery({
+    queryFn: fetchMe,
+    queryKey: ["me"],
+  });
+
+  const updateMutation = useMutation({
+    mutationFn: updateMe,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["me"] });
+    },
+  });
+
+  return {
+    query,
+    updateMutation,
+  };
+};
