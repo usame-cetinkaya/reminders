@@ -1,4 +1,21 @@
-import { Reminder } from "@/lib/models";
+import { Reminder, ReminderDTO } from "@/lib/models";
+
+export const toReminderDTO = (reminder: Reminder) => ({
+  id: reminder.id,
+  name: reminder.name,
+  period: reminder.period,
+  remind_at: reminder.remind_at,
+});
+
+export const updateReminderWithDTO = (
+  reminder: Reminder,
+  dto: ReminderDTO,
+): Reminder => ({
+  ...reminder,
+  name: dto.name || reminder.name,
+  period: dto.period || reminder.period,
+  remind_at: dto.remind_at || reminder.remind_at,
+});
 
 export const getDueReminders = async (db: D1Database, now: Date) => {
   const sql = `SELECT * FROM reminders WHERE remind_at <= ?`;
@@ -30,9 +47,7 @@ export const createReminder = async (db: D1Database, reminder: Reminder) => {
     .bind(user_id, name, period, remind_at)
     .run();
 
-  const id = result.meta.last_row_id;
-
-  return { id, user_id, name, period, remind_at } as Reminder;
+  return result.meta.last_row_id;
 };
 
 export const updateReminder = async (db: D1Database, reminder: Reminder) => {
@@ -40,11 +55,10 @@ export const updateReminder = async (db: D1Database, reminder: Reminder) => {
   const sql = `UPDATE reminders SET name = ?, period = ?, remind_at = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?`;
 
   await db.prepare(sql).bind(name, period, remind_at, id).run();
-
-  return { id, name, period, remind_at } as Reminder;
 };
 
 export const deleteReminder = async (db: D1Database, id: number) => {
   const sql = `DELETE FROM reminders WHERE id = ?`;
+
   await db.prepare(sql).bind(id).run();
 };

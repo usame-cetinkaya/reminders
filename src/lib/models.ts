@@ -6,12 +6,19 @@ export type User = {
   created_at: string;
 };
 
+export type Period = "once" | "daily" | "weekly" | "monthly" | "yearly";
+
 export type Reminder = {
   id: number;
   user_id: number;
   name: string;
-  period: "once" | "daily" | "weekly" | "monthly" | "yearly";
+  period: Period;
   remind_at: string;
   created_at: string;
   updated_at: string;
 };
+
+export type ReminderDTO = Omit<
+  Reminder,
+  "user_id" | "created_at" | "updated_at"
+>;

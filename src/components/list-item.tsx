@@ -1,10 +1,10 @@
-import { Reminder } from "@/lib/models";
+import { ReminderDTO } from "@/lib/models";
 import { localDateTime } from "@/lib/notification";
 import { Button } from "@/components/ui/button";
 import { Calendar, RefreshCw, Trash } from "lucide-react";
 
 interface ListItemProps {
-  reminder: Reminder;
+  reminder: ReminderDTO;
   onItemClick: () => void;
   onDeleteClick: () => void;
 }
@@ -25,10 +25,12 @@ export default function ListItem({
             <Calendar className="size-4" />
             <span>{localDateTime(reminder.remind_at)}</span>
           </div>
-          <div className="flex items-center gap-1">
-            <RefreshCw className="size-4" />
-            <span>{reminder.period}</span>
-          </div>
+          {reminder.period !== "once" && (
+            <div className="flex items-center gap-1">
+              <RefreshCw className="size-4" />
+              <span>{reminder.period}</span>
+            </div>
+          )}
         </div>
       </div>
       <Button
