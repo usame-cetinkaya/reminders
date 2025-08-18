@@ -23,39 +23,37 @@ const getBody = ({ period, created_at }: Reminder) =>
     : `This is a ${period} reminder.`;
 
 export const notify = async (user: User, reminder: Reminder) => {
-  if (!user.pb_token) {
-    throw new Error("User does not have a Pushbullet access token");
-  }
-
   const title = getTitle(reminder);
   const body = getBody(reminder);
 
-  // return notifyViaPushbullet(title, body, user.pb_token);
-  return notifyViaResend(user.email, title, body);
+  if (user.pb_token) {
+    await notifyViaPushbullet(title, body, user.pb_token);
+  }
+  await notifyViaResend(user.email, title, body);
 };
 
-// const notifyViaPushbullet = async (
-//   title: string,
-//   body: string,
-//   accessToken: string,
-// ) => {
-//   const response = await fetch("https://api.pushbullet.com/v2/pushes", {
-//     method: "POST",
-//     headers: {
-//       "Content-Type": "application/json",
-//       "Access-Token": accessToken,
-//     },
-//     body: JSON.stringify({
-//       type: "note",
-//       title,
-//       body,
-//     }),
-//   });
-//
-//   if (!response.ok) {
-//     throw new Error(`Pushbullet API error: ${response.statusText}`);
-//   }
-// };
+const notifyViaPushbullet = async (
+  title: string,
+  body: string,
+  accessToken: string,
+) => {
+  const response = await fetch("https://api.pushbullet.com/v2/pushes", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "Access-Token": accessToken,
+    },
+    body: JSON.stringify({
+      type: "note",
+      title,
+      body,
+    }),
+  });
+
+  if (!response.ok) {
+    throw new Error(`Pushbullet API error: ${response.statusText}`);
+  }
+};
 
 const notifyViaResend = async (to: string, subject: string, html: string) => {
   const response = await fetch("https://api.resend.com/emails", {
