@@ -1,29 +1,34 @@
 "use client";
 
 import { useTheme } from "next-themes";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 export default function Settings() {
   const { theme, setTheme } = useTheme();
   return (
-    <div className="max-w-3xl mx-auto p-4">
-      <h1 className="text-2xl font-semibold mb-4">Settings</h1>
-      <div className="space-y-4">
-        <div>
-          <label htmlFor="theme" className="block text-sm font-medium mb-2">
-            Theme
-          </label>
-          <select
-            id="theme"
-            value={theme}
-            onChange={(e) => setTheme(e.target.value)}
-            className="block w-full p-2 border rounded"
-          >
-            <option value="system">System</option>
-            <option value="light">Light</option>
-            <option value="dark">Dark</option>
-          </select>
+    <>
+      <h1 className="text-xl font-semibold mb-4">Settings</h1>
+      <div className="flex flex-col gap-4">
+        <div className="flex items-center justify-between">
+          <label>Theme</label>
+          <Select value={theme} onValueChange={(value) => setTheme(value)}>
+            <SelectTrigger>
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="system">System</SelectItem>
+              <SelectItem value="light">Light</SelectItem>
+              <SelectItem value="dark">Dark</SelectItem>
+            </SelectContent>
+          </Select>
         </div>
       </div>
-    </div>
+    </>
   );
 }

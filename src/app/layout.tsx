@@ -32,9 +32,7 @@ export default function RootLayout({
         <Providers>
           <div className="max-w-3xl min-h-screen mx-auto md:border flex flex-col">
             <Header />
-            <main className="px-2 md:px-4 py-4 relative flex-1">
-              {children}
-            </main>
+            <main className="px-4 py-4 relative flex-1">{children}</main>
           </div>
         </Providers>
       </body>

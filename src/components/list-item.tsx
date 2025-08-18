@@ -16,19 +16,23 @@ export default function ListItem({
   return (
     <div
       onClick={() => onItemClick()}
-      className="cursor-pointer flex items-center p-2 pl-4 border rounded-lg hover:bg-accent transition-colors"
+      className="cursor-pointer flex items-center p-2 border rounded-lg hover:bg-accent transition-colors"
     >
-      <div className="flex flex-col gap-1">
-        <span className="text-lg font-semibold">{reminder.name}</span>
+      <div className="flex flex-col gap-2">
+        <span className="text-lg font-semibold leading-none">
+          {reminder.name}
+        </span>
         <div className="flex items-center gap-4 text-sm text-muted-foreground">
           <div className="flex items-center gap-1">
             <Calendar className="size-4" />
-            <span>{localDateTime(reminder.remind_at)}</span>
+            <span className="leading-none">
+              {localDateTime(reminder.remind_at)}
+            </span>
           </div>
           {reminder.period !== "once" && (
             <div className="flex items-center gap-1">
               <RefreshCw className="size-4" />
-              <span>{reminder.period}</span>
+              <span className="leading-none">{reminder.period}</span>
             </div>
           )}
         </div>
