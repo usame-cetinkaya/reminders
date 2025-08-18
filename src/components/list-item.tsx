@@ -16,7 +16,7 @@ export default function ListItem({
   return (
     <div
       onClick={() => onItemClick()}
-      className="cursor-pointer flex items-center p-2 pl-4 border rounded-lg"
+      className="cursor-pointer flex items-center p-2 pl-4 border rounded-lg hover:bg-accent transition-colors"
     >
       <div className="flex flex-col gap-1">
         <span className="text-lg font-semibold">{reminder.name}</span>
