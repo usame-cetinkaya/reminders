@@ -6,7 +6,7 @@ import { useRemindersQuery } from "@/lib/react-query";
 import { Button } from "@/components/ui/button";
 import ListItem from "@/components/list-item";
 import { Plus } from "lucide-react";
-import { ReminderSheet } from "@/components/reminder-sheet";
+import { ReminderForm } from "@/components/reminder-form";
 
 export default function Home() {
   const { query, createMutation, updateMutation, deleteMutation } =
@@ -55,7 +55,7 @@ export default function Home() {
           ))}
         </div>
       )}
-      <ReminderSheet
+      <ReminderForm
         isOpen={isSheetOpen}
         onClose={() => setIsSheetOpen(false)}
         reminder={reminderToEdit}
