@@ -102,7 +102,10 @@ const fetchMe = async () => {
   if (!response.ok) {
     throw new Error("Failed to fetch me");
   }
-  return (await response.json()) as unknown as { pb_token: string | null };
+  return (await response.json()) as unknown as {
+    pb_token: string | null;
+    has_api_token: boolean;
+  };
 };
 
 const updateMe = async ({ pb_token }: { pb_token: string | null }) => {
@@ -116,6 +119,19 @@ const updateMe = async ({ pb_token }: { pb_token: string | null }) => {
   if (!response.ok) {
     throw new Error("Failed to update me");
   }
+};
+
+const createApiToken = async () => {
+  const response = await fetch("/api/me", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+  });
+  if (!response.ok) {
+    throw new Error("Failed to update me");
+  }
+  return (await response.json()) as unknown as { token: string };
 };
 
 export const useMeQuery = () => {
@@ -133,8 +149,16 @@ export const useMeQuery = () => {
     },
   });
 
+  const createMutation = useMutation({
+    mutationFn: createApiToken,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["me"] });
+    },
+  });
+
   return {
     query,
     updateMutation,
+    createMutation,
   };
 };

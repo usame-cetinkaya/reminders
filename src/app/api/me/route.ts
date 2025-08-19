@@ -2,6 +2,7 @@ import { auth } from "@/auth";
 import { NextAuthRequest } from "next-auth";
 import { getCloudflareContext } from "@opennextjs/cloudflare";
 import { NextResponse } from "next/server";
+import { rotateApiToken } from "@/lib/api-token";
 import { getUserByEmail } from "@/lib/user";
 
 const getDbAndUser = async (req: NextAuthRequest) => {
@@ -19,7 +20,18 @@ export const GET = auth(async function (req) {
   const { user } = await getDbAndUser(req);
   const { pb_token } = user;
 
-  return NextResponse.json({ pb_token }, { status: 200 });
+  return NextResponse.json(
+    { pb_token, has_api_token: !!user.api_token },
+    { status: 200 },
+  );
+});
+
+export const POST = auth(async function (req) {
+  const { db, user } = await getDbAndUser(req);
+
+  const token = await rotateApiToken(db, user.id);
+
+  return NextResponse.json({ token }, { status: 200 });
 });
 
 export const PUT = auth(async function (req) {

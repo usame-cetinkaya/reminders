@@ -12,14 +12,25 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Eye, EyeOff, LoaderCircle, Save } from "lucide-react";
+import {
+  Eye,
+  EyeOff,
+  LoaderCircle,
+  Save,
+  RefreshCw,
+  Key,
+  Copy,
+  Check,
+} from "lucide-react";
 
 export default function Settings() {
   const { theme, setTheme } = useTheme();
 
-  const { query, updateMutation } = useMeQuery();
+  const { query, updateMutation, createMutation } = useMeQuery();
   const [pushbulletToken, setPushbulletToken] = useState<string>("");
   const [showPushbulletToken, setShowPushbulletToken] = useState(false);
+  const [apiToken, setApiToken] = useState<string>("");
+  const [copiedApiToken, setCopiedApiToken] = useState(false);
 
   useEffect(() => {
     if (query.data) {
@@ -29,6 +40,17 @@ export default function Settings() {
 
   const handleSavePushbulletToken = async () => {
     await updateMutation.mutateAsync({ pb_token: pushbulletToken || null });
+  };
+
+  const handleCreateApiToken = async () => {
+    const { token } = await createMutation.mutateAsync();
+    setApiToken(token);
+  };
+
+  const handleCopyApiToken = async () => {
+    await navigator.clipboard.writeText(apiToken);
+    setCopiedApiToken(true);
+    setTimeout(() => setCopiedApiToken(false), 2000);
   };
 
   return (
@@ -48,6 +70,33 @@ export default function Settings() {
             </SelectContent>
           </Select>
         </div>
+        <div className="flex gap-4 flex-row items-center justify-between">
+          <label>API Token</label>
+          <div className="flex items-center gap-2">
+            {!apiToken ? (
+              <Button
+                onClick={handleCreateApiToken}
+                disabled={query.isLoading || createMutation.isPending}
+              >
+                {createMutation.isPending ? (
+                  <LoaderCircle className="animate-spin" />
+                ) : query.data?.has_api_token ? (
+                  <RefreshCw />
+                ) : (
+                  <Key />
+                )}
+                {query.data?.has_api_token ? "Rotate" : "Create"} API Token
+              </Button>
+            ) : (
+              <>
+                <Input type="text" value={apiToken} readOnly />
+                <Button variant="secondary" onClick={handleCopyApiToken}>
+                  {copiedApiToken ? <Check /> : <Copy />}
+                </Button>
+              </>
+            )}
+          </div>
+        </div>
         <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
           <label>Pushbullet Access Token</label>
           <div className="flex items-center gap-2">
@@ -65,7 +114,7 @@ export default function Settings() {
             </Button>
             <Button
               onClick={handleSavePushbulletToken}
-              disabled={updateMutation.isPending}
+              disabled={query.isLoading || updateMutation.isPending}
             >
               {updateMutation.isPending ? (
                 <LoaderCircle className="animate-spin" />
