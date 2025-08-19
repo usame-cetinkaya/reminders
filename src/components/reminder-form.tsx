@@ -72,14 +72,14 @@ export function ReminderForm({
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <form onSubmit={handleSubmit}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle className="text-left">
-              {reminder ? "Edit" : "New"} Reminder
-            </DialogTitle>
-            <DialogDescription />
-          </DialogHeader>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle className="text-left">
+            {reminder ? "Edit" : "New"} Reminder
+          </DialogTitle>
+          <DialogDescription />
+        </DialogHeader>
+        <form onSubmit={handleSubmit} className="flex flex-col gap-4">
           <div className="grid gap-2">
             <Label htmlFor="name">Name</Label>
             <Input
@@ -123,7 +123,7 @@ export function ReminderForm({
           </div>
           <Button
             type="submit"
-            className="mt-6"
+            className="mt-6 cursor-pointer"
             disabled={createMutation.isPending || updateMutation.isPending}
           >
             {createMutation.isPending || updateMutation.isPending ? (
@@ -133,8 +133,8 @@ export function ReminderForm({
             )}
             Save
           </Button>
-        </DialogContent>
-      </form>
+        </form>
+      </DialogContent>
     </Dialog>
   );
 }
