@@ -1,4 +1,7 @@
+import { neon } from "@neondatabase/serverless";
 import { User } from "@/lib/models";
+
+const sql = neon(`${process.env.DATABASE_URL}`);
 
 function generateToken(): string {
   const bytes = new Uint8Array(32);
@@ -16,20 +19,18 @@ export async function hashToken(token: string): Promise<string> {
     .join("");
 }
 
-export async function rotateApiToken(db: D1Database, userId: number) {
+export async function rotateApiToken(userId: number) {
   const token = generateToken();
   const tokenHash = await hashToken(token);
-  const sql = `UPDATE users SET api_token = ? WHERE id = ?`;
 
-  await db.prepare(sql).bind(tokenHash, userId).run();
+  await sql`UPDATE users SET api_token = ${tokenHash} WHERE id = ${userId}`;
 
   return token; // return raw token to user ONCE
 }
 
-export const getUserByAPIToken = async (db: D1Database, apiToken: string) => {
+export const getUserByAPIToken = async (apiToken: string) => {
   const tokenHash = await hashToken(apiToken);
-  const sql = `SELECT * FROM users WHERE api_token = ?`;
-  const result = await db.prepare(sql).bind(tokenHash).first();
+  const result = await sql`SELECT * FROM users WHERE api_token = ${tokenHash}`;
 
-  return result as unknown as User;
+  return result[0] as unknown as User;
 };

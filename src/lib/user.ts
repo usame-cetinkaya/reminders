@@ -1,28 +1,31 @@
+import { neon } from "@neondatabase/serverless";
 import { User } from "@/lib/models";
 
-export const getUserById = async (db: D1Database, id: number) => {
-  const sql = `SELECT * FROM users WHERE id = ?`;
-  const result = await db.prepare(sql).bind(id).first();
+const sql = neon(`${process.env.DATABASE_URL}`);
 
-  return result as unknown as User;
+export const getUserById = async (id: number) => {
+  const result = await sql`SELECT * FROM users WHERE id = ${id}`;
+
+  return result[0] as unknown as User;
 };
 
-export const getUserByEmail = async (db: D1Database, email: string) => {
-  const sql = `SELECT * FROM users WHERE email = ?`;
-  const result = await db.prepare(sql).bind(email).first();
+export const getUserByEmail = async (email: string) => {
+  const result = await sql`SELECT * FROM users WHERE email = ${email}`;
 
-  if (email && !result) {
-    return createUser(db, email);
+  if (email && !result.length) {
+    return createUser(email);
   }
 
-  return result as unknown as User;
+  return result[0] as unknown as User;
 };
 
-export const createUser = async (db: D1Database, email: string) => {
-  const sql = `INSERT INTO users (email) VALUES (?)`;
-  const result = await db.prepare(sql).bind(email).run();
-
-  const id = result.meta.last_row_id;
+export const createUser = async (email: string) => {
+  const result = await sql`
+    INSERT INTO users (email)
+    VALUES (${email})
+    RETURNING id
+  `;
+  const id = result[0].id;
 
   return { id, email } as User;
 };

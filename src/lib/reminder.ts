@@ -1,4 +1,7 @@
+import { neon } from "@neondatabase/serverless";
 import { Reminder, ReminderDTO } from "@/lib/models";
+
+const sql = neon(`${process.env.DATABASE_URL}`);
 
 export const toReminderDTO = (reminder: Reminder) => ({
   id: reminder.id,
@@ -17,48 +20,46 @@ export const updateReminderWithDTO = (
   remind_at: dto.remind_at || reminder.remind_at,
 });
 
-export const getDueReminders = async (db: D1Database, now: Date) => {
-  const sql = `SELECT * FROM reminders WHERE remind_at <= ?`;
-  const result = await db.prepare(sql).bind(now.toISOString()).all();
+export const getDueReminders = async (now: Date) => {
+  const result = await sql`SELECT * FROM reminders WHERE remind_at <= ${now}`;
 
-  return result.results as Reminder[];
+  return result as unknown as Reminder[];
 };
 
-export const getRemindersByUserId = async (db: D1Database, userId: number) => {
-  const sql = `SELECT * FROM reminders WHERE user_id = ? ORDER BY remind_at`;
-  const result = await db.prepare(sql).bind(userId).all();
+export const getRemindersByUserId = async (userId: number) => {
+  const result = await sql`
+    SELECT * FROM reminders WHERE user_id = ${userId} ORDER BY remind_at
+  `;
 
-  return result.results as Reminder[];
+  return result as unknown as Reminder[];
 };
 
-export const getReminderById = async (db: D1Database, id: number) => {
-  const sql = `SELECT * FROM reminders WHERE id = ?`;
-  const result = await db.prepare(sql).bind(id).first();
+export const getReminderById = async (id: number) => {
+  const result = await sql`SELECT * FROM reminders WHERE id = ${id}`;
 
-  return result as Reminder;
+  return result[0] as Reminder;
 };
 
-export const createReminder = async (db: D1Database, reminder: Reminder) => {
+export const createReminder = async (reminder: Reminder) => {
   const { user_id, name, period, remind_at } = reminder;
-  const sql = `INSERT INTO reminders (user_id, name, period, remind_at) VALUES (?, ?, ?, ?)`;
+  const result = await sql`
+    INSERT INTO reminders (user_id, name, period, remind_at)
+    VALUES (${user_id}, ${name}, ${period}, ${remind_at})
+    RETURNING id
+  `;
 
-  const result = await db
-    .prepare(sql)
-    .bind(user_id, name, period, remind_at)
-    .run();
-
-  return result.meta.last_row_id;
+  return result[0].id as number;
 };
 
-export const updateReminder = async (db: D1Database, reminder: Reminder) => {
+export const updateReminder = async (reminder: Reminder) => {
   const { id, name, period, remind_at } = reminder;
-  const sql = `UPDATE reminders SET name = ?, period = ?, remind_at = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?`;
-
-  await db.prepare(sql).bind(name, period, remind_at, id).run();
+  await sql`
+    UPDATE reminders 
+    SET name = ${name}, period = ${period}, remind_at = ${remind_at}, updated_at = CURRENT_TIMESTAMP 
+    WHERE id = ${id}
+  `;
 };
 
-export const deleteReminder = async (db: D1Database, id: number) => {
-  const sql = `DELETE FROM reminders WHERE id = ?`;
-
-  await db.prepare(sql).bind(id).run();
+export const deleteReminder = async (id: number) => {
+  await sql`DELETE FROM reminders WHERE id = ${id}`;
 };

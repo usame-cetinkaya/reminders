@@ -93,7 +93,7 @@ fetch('https://reminders.yourdomain.com/api/reminders', {
 ```
 
 ## Built With
-- [OpenNext](https://opennext.js.org/)
+- [Next.js](https://nextjs.org/)
 - [Prettier](https://prettier.io/)
 - [Auth.js](https://authjs.dev/)
 - [Cloudflare D1](https://developers.cloudflare.com/d1/)

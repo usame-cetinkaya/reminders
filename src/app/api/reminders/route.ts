@@ -1,7 +1,6 @@
-import { auth } from "@/auth";
 import { NextAuthRequest } from "next-auth";
-import { getCloudflareContext } from "@opennextjs/cloudflare";
 import { NextResponse } from "next/server";
+import { auth } from "@/auth";
 import { getUserByAPIToken } from "@/lib/api-token";
 import { Reminder, ReminderDTO } from "@/lib/models";
 import {
@@ -15,39 +14,34 @@ import {
 } from "@/lib/reminder";
 import { getUserByEmail } from "@/lib/user";
 
-const getDbAndUser = async (req: NextAuthRequest) => {
-  const db = getCloudflareContext().env.DB;
-
+const getUser = async (req: NextAuthRequest) => {
   const authHeader = req.headers.get("Authorization");
 
   if (authHeader && authHeader.startsWith("Bearer ")) {
     const token = authHeader.slice(7).trim();
 
     if (token) {
-      const user = await getUserByAPIToken(db, token);
-
-      return { db, user };
+      return await getUserByAPIToken(token);
     }
   }
 
   if (!req.auth) throw new Error("Unauthorized");
 
   const email = req?.auth?.user?.email as string;
-  const user = await getUserByEmail(db, email);
 
-  return { db, user };
+  return await getUserByEmail(email);
 };
 
 export const GET = auth(async function (req) {
-  const { db, user } = await getDbAndUser(req);
-  const reminders = await getRemindersByUserId(db, user.id);
+  const user = await getUser(req);
+  const reminders = await getRemindersByUserId(user.id);
   const result = reminders.map(toReminderDTO);
 
   return NextResponse.json(result, { status: 200 });
 });
 
 export const POST = auth(async function (req) {
-  const { db, user } = await getDbAndUser(req);
+  const user = await getUser(req);
   const reminderDTO = (await req.json()) as ReminderDTO & { minutes: number };
 
   if (reminderDTO.minutes) {
@@ -66,15 +60,15 @@ export const POST = auth(async function (req) {
     reminderDTO,
   );
 
-  const id = await createReminder(db, reminder);
+  const id = await createReminder(reminder);
 
   return NextResponse.json({ id }, { status: 201 });
 });
 
 export const PUT = auth(async function (req) {
-  const { db, user } = await getDbAndUser(req);
+  const user = await getUser(req);
   const reminderDTO = (await req.json()) as ReminderDTO;
-  const reminder = await getReminderById(db, reminderDTO.id);
+  const reminder = await getReminderById(reminderDTO.id);
   const isOwner = reminder && reminder.user_id === user.id;
 
   if (!isOwner) return NextResponse.json("Unauthorized", { status: 401 });
@@ -85,20 +79,20 @@ export const PUT = auth(async function (req) {
 
   const patchedReminder = updateReminderWithDTO(reminder, reminderDTO);
 
-  await updateReminder(db, patchedReminder);
+  await updateReminder(patchedReminder);
 
   return NextResponse.json(null, { status: 200 });
 });
 
 export const DELETE = auth(async function (req) {
-  const { db, user } = await getDbAndUser(req);
+  const user = await getUser(req);
   const { id } = (await req.json()) as { id: number };
-  const reminder = await getReminderById(db, id);
+  const reminder = await getReminderById(id);
   const isOwner = reminder && reminder.user_id === user.id;
 
   if (!isOwner) return NextResponse.json("Unauthorized", { status: 401 });
 
-  await deleteReminder(db, id);
+  await deleteReminder(id);
 
   return NextResponse.json(null, { status: 200 });
 });

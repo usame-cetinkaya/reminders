@@ -1,23 +1,20 @@
-import { auth } from "@/auth";
 import { NextAuthRequest } from "next-auth";
-import { getCloudflareContext } from "@opennextjs/cloudflare";
 import { NextResponse } from "next/server";
+import { neon } from "@neondatabase/serverless";
+import { auth } from "@/auth";
 import { rotateApiToken } from "@/lib/api-token";
 import { getUserByEmail } from "@/lib/user";
 
-const getDbAndUser = async (req: NextAuthRequest) => {
-  const db = getCloudflareContext().env.DB;
-
+const getUser = async (req: NextAuthRequest) => {
   if (!req.auth) throw new Error("Unauthorized");
 
   const email = req?.auth?.user?.email as string;
-  const user = await getUserByEmail(db, email);
 
-  return { db, user };
+  return await getUserByEmail(email);
 };
 
 export const GET = auth(async function (req) {
-  const { user } = await getDbAndUser(req);
+  const user = await getUser(req);
   const { pb_token } = user;
 
   return NextResponse.json(
@@ -27,22 +24,19 @@ export const GET = auth(async function (req) {
 });
 
 export const POST = auth(async function (req) {
-  const { db, user } = await getDbAndUser(req);
+  const user = await getUser(req);
 
-  const token = await rotateApiToken(db, user.id);
+  const token = await rotateApiToken(user.id);
 
   return NextResponse.json({ token }, { status: 200 });
 });
 
 export const PUT = auth(async function (req) {
-  const { db, user } = await getDbAndUser(req);
+  const sql = neon(`${process.env.DATABASE_URL}`);
+  const user = await getUser(req);
   const { pb_token } = (await req.json()) as { pb_token: string };
 
-  const sql = `UPDATE users SET pb_token = ? WHERE id = ?`;
-  await db
-    .prepare(sql)
-    .bind(pb_token || null, user.id)
-    .run();
+  await sql`UPDATE users SET pb_token = ${pb_token} WHERE id = ${user.id}`;
 
   return NextResponse.json(null, { status: 200 });
 });
