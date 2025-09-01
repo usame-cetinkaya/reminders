@@ -66,9 +66,12 @@ export const POST = auth(async function (req) {
     reminderDTO,
   );
 
-  const id = await createReminder(db, reminder);
+  await createReminder(db, reminder);
 
-  return NextResponse.json({ id }, { status: 201 });
+  const reminders = await getRemindersByUserId(db, user.id);
+  const result = reminders.map(toReminderDTO);
+
+  return NextResponse.json(result, { status: 201 });
 });
 
 export const PUT = auth(async function (req) {
