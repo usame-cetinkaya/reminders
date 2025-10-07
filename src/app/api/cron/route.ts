@@ -13,9 +13,7 @@ export async function GET(req: Request) {
   const authHeader = req.headers.get("Authorization");
 
   if (!cronSecret || !authHeader || authHeader !== `Bearer ${cronSecret}`) {
-    return new Response(JSON.stringify({ error: "Unauthorized" }), {
-      status: 401,
-    });
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
   const now = new Date();
@@ -32,7 +30,7 @@ export async function GET(req: Request) {
     await handleReminderPeriod(reminder);
   }
 
-  return NextResponse.json(null, { status: 200 });
+  return NextResponse.json({ ok: true }, { status: 200 });
 }
 
 const handleReminderPeriod = async (reminder: Reminder) => {
