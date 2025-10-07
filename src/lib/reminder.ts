@@ -1,4 +1,7 @@
+import { eq, lte } from "drizzle-orm";
+import { db } from "@/lib/db";
 import { Reminder, ReminderDTO } from "@/lib/models";
+import { reminders } from "@/lib/schema";
 
 export const toReminderDTO = (reminder: Reminder) => ({
   id: reminder.id,
@@ -17,48 +20,41 @@ export const updateReminderWithDTO = (
   remind_at: dto.remind_at || reminder.remind_at,
 });
 
-export const getDueReminders = async (db: D1Database, now: Date) => {
-  const sql = `SELECT * FROM reminders WHERE remind_at <= ?`;
-  const result = await db.prepare(sql).bind(now.toISOString()).all();
-
-  return result.results as Reminder[];
+export const getDueReminders = async (now: Date) => {
+  return db
+    .select()
+    .from(reminders)
+    .where(
+      lte(reminders.remind_at, now.toISOString()),
+    ) as unknown as Reminder[];
 };
 
-export const getRemindersByUserId = async (db: D1Database, userId: number) => {
-  const sql = `SELECT * FROM reminders WHERE user_id = ? ORDER BY remind_at`;
-  const result = await db.prepare(sql).bind(userId).all();
-
-  return result.results as Reminder[];
+export const getRemindersByUserId = async (userId: number) => {
+  return db
+    .select()
+    .from(reminders)
+    .where(eq(reminders.user_id, userId))
+    .orderBy(reminders.remind_at);
 };
 
-export const getReminderById = async (db: D1Database, id: number) => {
-  const sql = `SELECT * FROM reminders WHERE id = ?`;
-  const result = await db.prepare(sql).bind(id).first();
-
-  return result as Reminder;
+export const getReminderById = async (id: number) => {
+  const result = await db.select().from(reminders).where(eq(reminders.id, id));
+  return result[0] as Reminder;
 };
 
-export const createReminder = async (db: D1Database, reminder: Reminder) => {
-  const { user_id, name, period, remind_at } = reminder;
-  const sql = `INSERT INTO reminders (user_id, name, period, remind_at) VALUES (?, ?, ?, ?)`;
-
-  const result = await db
-    .prepare(sql)
-    .bind(user_id, name, period, remind_at)
-    .run();
-
-  return result.meta.last_row_id;
+export const createReminder = async (reminder: Reminder) => {
+  const result = await db.insert(reminders).values(reminder).returning();
+  return result[0]?.id;
 };
 
-export const updateReminder = async (db: D1Database, reminder: Reminder) => {
-  const { id, name, period, remind_at } = reminder;
-  const sql = `UPDATE reminders SET name = ?, period = ?, remind_at = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?`;
-
-  await db.prepare(sql).bind(name, period, remind_at, id).run();
+export const updateReminder = async (reminder: Reminder) => {
+  if (!reminder.id) throw new Error("Missing reminder ID");
+  return db
+    .update(reminders)
+    .set(reminder)
+    .where(eq(reminders.id, reminder.id));
 };
 
-export const deleteReminder = async (db: D1Database, id: number) => {
-  const sql = `DELETE FROM reminders WHERE id = ?`;
-
-  await db.prepare(sql).bind(id).run();
+export const deleteReminder = async (id: number) => {
+  return db.delete(reminders).where(eq(reminders.id, id));
 };

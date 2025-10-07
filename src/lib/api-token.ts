@@ -1,4 +1,7 @@
+import { eq } from "drizzle-orm";
+import { db } from "@/lib/db";
 import { User } from "@/lib/models";
+import { users } from "@/lib/schema";
 
 function generateToken(): string {
   const bytes = new Uint8Array(32);
@@ -16,20 +19,25 @@ export async function hashToken(token: string): Promise<string> {
     .join("");
 }
 
-export async function rotateApiToken(db: D1Database, userId: number) {
+export async function rotateApiToken(userId: number) {
   const token = generateToken();
   const tokenHash = await hashToken(token);
-  const sql = `UPDATE users SET api_token = ? WHERE id = ?`;
 
-  await db.prepare(sql).bind(tokenHash, userId).run();
+  await db
+    .update(users)
+    .set({ api_token: tokenHash })
+    .where(eq(users.id, userId));
 
-  return token; // return raw token to user ONCE
+  return token;
 }
 
-export const getUserByAPIToken = async (db: D1Database, apiToken: string) => {
+export async function getUserByAPIToken(apiToken: string) {
   const tokenHash = await hashToken(apiToken);
-  const sql = `SELECT * FROM users WHERE api_token = ?`;
-  const result = await db.prepare(sql).bind(tokenHash).first();
 
-  return result as unknown as User;
-};
+  const result = await db
+    .select()
+    .from(users)
+    .where(eq(users.api_token, tokenHash));
+
+  return result[0] as User;
+}
