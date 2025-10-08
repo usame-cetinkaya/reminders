@@ -10,13 +10,13 @@ export default auth((req) => {
   return new Response(null, {
     status: 302,
     headers: {
-      Location: `${req.nextUrl.origin}/api/auth/signin`,
+      Location: `${req.nextUrl.origin}/login`,
     },
   });
 });
 
 export const config = {
   matcher: [
-    "/((?!api/auth/signout|_next/static|_next/image|favicon.ico|manifest.json).*)",
+    "/((?!api/auth/signout|login|_next/static|_next/image|favicon.ico|.*.png|manifest.json).*)",
   ],
 };

@@ -18,7 +18,7 @@ export const metadata: Metadata = {
   title: "Reminders",
   description: "A simple reminders app",
   icons: {
-    icon: "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='48' height='48' viewBox='0 0 16 16'><text x='0' y='14'>🔔</text></svg>",
+    icon: "/icon-192.png",
   },
 };
 
@@ -35,7 +35,9 @@ export default function RootLayout({
         <Providers>
           <div className="max-w-3xl min-h-screen mx-auto md:border flex flex-col">
             <Header />
-            <main className="px-4 py-4 relative flex-1">{children}</main>
+            <main className="px-4 py-4 relative flex-1 flex flex-col">
+              {children}
+            </main>
           </div>
         </Providers>
       </body>

@@ -21,6 +21,11 @@ const getInitials = (fullName: string) =>
 
 export function UserNav() {
   const { data: session } = useSession();
+
+  if (!session) {
+    return null;
+  }
+
   const name = session?.user?.name || "";
   const image = session?.user?.image || "";
   const email = session?.user?.email || "";
