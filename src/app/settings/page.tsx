@@ -22,6 +22,7 @@ import {
   Copy,
   Check,
 } from "lucide-react";
+import { PushNotificationManager } from "@/components/push-notification-manager";
 
 export default function Settings() {
   const { theme, setTheme } = useTheme();
@@ -69,6 +70,12 @@ export default function Settings() {
               <SelectItem value="dark">Dark</SelectItem>
             </SelectContent>
           </Select>
+        </div>
+        <div className="flex gap-4 flex-row items-center justify-between">
+          <label>Push Notifications</label>
+          <div className="flex items-center gap-2">
+            <PushNotificationManager />
+          </div>
         </div>
         <div className="flex gap-4 flex-row items-center justify-between">
           <label>API Token</label>

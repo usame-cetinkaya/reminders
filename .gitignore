@@ -51,3 +51,6 @@ next-env.d.ts
 
 # DB
 /data
+
+# https for localhost
+/certificates

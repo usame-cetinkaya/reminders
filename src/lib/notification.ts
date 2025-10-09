@@ -1,19 +1,7 @@
+import webpush from "web-push";
+import { localDateTime, localTime } from "@/lib/date";
 import { Reminder, User } from "@/lib/models";
-
-export const localDateTime = (isoString: string) =>
-  new Date(isoString).toLocaleString("tr-TR", {
-    timeZone: "Europe/Istanbul",
-    hour: "2-digit",
-    minute: "2-digit",
-    year: "numeric",
-    month: "2-digit",
-    day: "2-digit",
-  });
-
-const localTime = (isoString: string) =>
-  new Date(isoString).toLocaleTimeString("tr-TR", {
-    timeZone: "Europe/Istanbul",
-  });
+import { getSubscriptionsByUserId } from "@/lib/subscriptions";
 
 const getTitle = ({ name, period, remind_at }: Reminder) =>
   `Reminder: ${name}  @${period === "once" ? localTime(remind_at) : localDateTime(remind_at)}`;
@@ -29,6 +17,7 @@ export const notify = async (user: User, reminder: Reminder) => {
   if (user.pb_token) {
     await notifyViaPushbullet(title, body, user.pb_token);
   }
+  await notifyViaWebPush(title, body, user.id);
   await notifyViaResend(user.email, title, body);
 };
 
@@ -72,5 +61,38 @@ const notifyViaResend = async (to: string, subject: string, html: string) => {
 
   if (!response.ok) {
     throw new Error(`Resend API error: ${response.statusText}`);
+  }
+};
+
+export const notifyViaWebPush = async (
+  title: string,
+  body: string,
+  userId: number,
+) => {
+  const subscriptions = (await getSubscriptionsByUserId(
+    userId,
+  )) as PushSubscription[];
+
+  webpush.setVapidDetails(
+    process.env.VAPID_SUBJECT!,
+    process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY!,
+    process.env.VAPID_PRIVATE_KEY!,
+  );
+
+  for (const subscription of subscriptions) {
+    if (!subscription) continue;
+
+    try {
+      await webpush.sendNotification(
+        subscription as unknown as webpush.PushSubscription,
+        JSON.stringify({
+          title,
+          body,
+          icon: "/icon-192.png",
+        }),
+      );
+    } catch (error) {
+      console.error("Error sending push notification:", error);
+    }
   }
 };

@@ -162,3 +162,72 @@ export const useMeQuery = () => {
     createMutation,
   };
 };
+
+const testSubscriptions = async () => {
+  const response = await fetch("/api/subscriptions", {
+    method: "GET",
+    headers: {
+      "Content-Type": "application/json",
+    },
+  });
+  if (!response.ok) {
+    throw new Error("Failed to test subscriptions");
+  }
+  return true;
+};
+
+const deleteSubscription = async (subscription: PushSubscription) => {
+  const response = await fetch("/api/subscriptions", {
+    method: "DELETE",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(subscription),
+  });
+  if (!response.ok) {
+    throw new Error("Failed to delete subscription");
+  }
+};
+
+const createSubscription = async (subscription: PushSubscription) => {
+  const response = await fetch("/api/subscriptions", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(subscription),
+  });
+  if (!response.ok) {
+    throw new Error("Failed to create subscription");
+  }
+};
+export const useSubscriptionsQuery = () => {
+  const queryClient = useQueryClient();
+
+  const test = useQuery({
+    queryFn: testSubscriptions,
+    queryKey: ["subscriptions"],
+    enabled: false,
+    retry: false,
+  });
+
+  const deleteMutation = useMutation({
+    mutationFn: deleteSubscription,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["subscriptions"] });
+    },
+  });
+
+  const createMutation = useMutation({
+    mutationFn: createSubscription,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["subscriptions"] });
+    },
+  });
+
+  return {
+    test,
+    createMutation,
+    deleteMutation,
+  };
+};

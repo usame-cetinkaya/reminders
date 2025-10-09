@@ -24,3 +24,14 @@ export const users = sqliteTable("users", {
     .notNull()
     .default(sql`(CURRENT_TIMESTAMP)`),
 });
+
+export const subscriptions = sqliteTable("subscriptions", {
+  id: integer("id").primaryKey({ autoIncrement: true }),
+  user_id: integer("user_id").notNull(),
+  json: text("json").notNull(),
+  created_at: text("created_at")
+    .notNull()
+    .default(sql`(CURRENT_TIMESTAMP)`),
+});
+
+export type Subscription = typeof subscriptions.$inferSelect;
